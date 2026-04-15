@@ -37,6 +37,9 @@ class Showroom:
         car = self.find_by_id(car_id)
         if car is None:
             return False
+        # Check if car is already sold (unavailable)
+        if not car.available:
+            return False
         car.available = False
         return True
 
@@ -49,15 +52,20 @@ class Showroom:
     def search(self, make: Optional[str] = None, model: Optional[str] = None) -> list[Car]:
         result = self._inventory
         if make is not None:
-            result = [car for car in result if car.make == make]
+            # Case-insensitive comparison
+            make_lower = make.lower()
+            result = [car for car in result if car.make.lower() == make_lower]
         if model is not None:
-            result = [car for car in result if car.model == model]
+            # Case-insensitive comparison
+            model_lower = model.lower()
+            result = [car for car in result if car.model.lower() == model_lower]
         return result
 
     def filter_by_price(self, min_price: float, max_price: float) -> list[Car]:
         if min_price > max_price:
             raise ValueError("min_price cannot exceed max_price")
-        return [car for car in self._inventory if min_price <= car.price < max_price]
+        # Use <= for upper bound to make it inclusive
+        return [car for car in self._inventory if min_price <= car.price <= max_price]
 
     def total_cars(self) -> int:
         return len(self._inventory)
